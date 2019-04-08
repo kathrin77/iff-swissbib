@@ -1,0 +1,4 @@
+Testdateien erstellen: Excel-Formel
+http://www.krainski.de/excel038.htm
+
+=INDEX(IFF_Katalog_FULL!A:A;ZEILE()*10)

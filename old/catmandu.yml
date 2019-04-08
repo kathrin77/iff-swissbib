@@ -1,0 +1,7 @@
+importer:
+  unicat:
+    package: SRU
+    options:
+       base: http://www.unicat.be/sru
+       recordSchema: marcxml
+       parser: marcxml
