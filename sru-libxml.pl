@@ -780,7 +780,7 @@ while ( $row = $csv->getline($fh_in) ) {
                         	} else {
                         		push @iff2replace, $MARC001, $bibnr, $IFFTOTAL;
                         	}
-                            print $fh_report "$MARC035a: Deduce points for IFF_MATCH: -". $IFFMATCH . "\n";                            
+                            print $fh_report "$MARC035a: IFF_MATCH: -". $IFFMATCH . "\n";                            
                             if ($MARC035_counter>1) { # other libraries have added to this bibrecord since upload from IFF => reimport
                             	#print $fh_report "Re-Import this document: $bibnr, No. of 035-fields: $MARC035_counter \n";
                             	$re_import = 1;
@@ -791,12 +791,12 @@ while ( $row = $csv->getline($fh_in) ) {
                         ################################
                         else { 
                         	if ($IS_ANALYTICA || $HAS_VOLUME || $HAS_VOLUME2) {
-                        		$IDSSGMATCH = 25; # not too many plus points in these cases - it could be the wrong match.
+                        		$IDSSGMATCH = 20; # not too many plus points in these cases - it could be the wrong match.
                         	} else {
-                        		$IDSSGMATCH = 50; # a lot of plus points so that it definitely becomes $bestmatch.
+                        		$IDSSGMATCH = 40; # a lot of plus points so that it definitely becomes $bestmatch.
                         	}
                                 
-                            print $fh_report "$MARC035a: add points for old IDSSG: $IDSSGMATCH \n";
+                            print $fh_report "$MARC035a: IDSSGMATCH: $IDSSGMATCH \n";
                             if ( hasTag("949", $xpc, $rec)) {
                                 foreach $el ($xpc->findnodes('./datafield[@tag=949 ]', $rec)) {
                                     $MARC949F =  $xpc->findnodes( './subfield[@code="F"]', $el )->to_literal;
@@ -812,10 +812,10 @@ while ( $row = $csv->getline($fh_in) ) {
                                         $BESTCASE    = 1;
                                     } elsif ($MARC949F =~ /HIFF/) {
                                     	print $fh_report "Feld 949: $MARC949F Signatur: $MARC949j --- callno: $callno \n";
-                                        $IDSSGMATCH += 5;
-                                        print $fh_report "$BESTCASE_E Best case: IFF attached, IDSSGMATCH = $IDSSGMATCH \n";
-                                        push @iff2replace, $MARC001, $bibnr, $IFFTOTAL;
-                                        $BESTCASE    = 1;
+                                        #$IDSSGMATCH += 5; not safe!
+                                        print $fh_report "$BESTCASE_E - IDSSGMATCH = $IDSSGMATCH \n";
+                                        push @iff2replace, $MARC001, $bibnr, $IFFTOTAL; 
+                                        #$BESTCASE    = 1; not safe!
                                     }
                                 }
                             }
@@ -838,7 +838,7 @@ while ( $row = $csv->getline($fh_in) ) {
                     }
                 }                
                     print $fh_report "Number of 035 fields: $MARC035_counter\n";
-                    print $fh_report "Matchpoints: $SLSPMATCH\n";
+                    print $fh_report "Matchpoints SLSP: $SLSPMATCH\n";
             }
             
             ######################################
@@ -856,7 +856,14 @@ while ( $row = $csv->getline($fh_in) ) {
             # eliminate totally unsafe matches:
             if (($TITLEMATCH == 0) && ($AUTHORMATCH == 0)) {
             	$TOTALMATCH = 0;
-            	print $fh_report "9999: Unsafe Match! $TOTALMATCH\n"
+            	print $fh_report "9999: Unsafe Match author-title! $TOTALMATCH\n"
+            }
+            
+            if ($HAS_ISBN) {
+            	if (($TITLEMATCH == 0) && ($ISBNMATCH == 0)) {
+            	$TOTALMATCH = 0;
+            	print $fh_report "9999: Unsafe Match title-isbn! $TOTALMATCH\n"
+            }
             }
             
             # check if this is currently the best match:
@@ -1272,11 +1279,14 @@ sub getJournalTitles {
 	"Model Tax Convention on Income and on Capital",
 	"Orange Tax Guide",
 	"Praxis des Verwaltungsgerichts", 
+	"Public Management Developments",
 	"Rechenschaftsbericht",
 	"Rechnung Basel-Stadt f.r das Jahr",
 	"Rechnung .... der Stadt",
 	"Rechnung .... des Kantons",
 	"Rechnung f.r den Staat",
+	"Research in Governmental and Nonprofit Accounting",
+	"Residence of Individuals under Tax Treaties and EC Law",
 	"Sammlung der Entscheidungen des Bundesfinanzhofs",
 	"Sammlung der Verwaltungsentscheide",
 	"Schweizerisches Steuer-Lexikon",
